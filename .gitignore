@@ -1,0 +1,23 @@
+# Environment secrets — never commit these
+.env
+.env.*
+.env.local
+
+# Dependencies
+node_modules/
+
+# Build outputs
+dist/
+.output/
+.wrangler/
+
+# Editor
+.vscode/*
+!.vscode/extensions.json
+.idea/
+.DS_Store
+
+# Base44 local link
+base44/.app.jsonc
+
+PlanetPulse/.git_backup/
