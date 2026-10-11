@@ -29,7 +29,7 @@ function MapInit({ registerMap }) {
   useEffect(() => {
     if (!map.getPane("labels")) {
       map.createPane("labels");
-      map.getPane("labels").style.zIndex = 650;
+      map.getPane("labels").style.zIndex = "650";
       map.getPane("labels").style.pointerEvents = "none";
     }
     registerMap(map);
@@ -119,7 +119,9 @@ export default function BeforeAfterMaps({ region, startYear, endYear, layer, his
   }, [mapA, mapB]);
 
   const stats = history ? computeGreeneryStats(history, beforeYear, afterYear) : null;
-  const center = region ? [region.lat, region.lng] : [20, 0];
+  const center = /** @type {import("leaflet").LatLngExpression} */ (
+    region ? [region.lat, region.lng] : [20, 0]
+  );
 
   return (
     <div>

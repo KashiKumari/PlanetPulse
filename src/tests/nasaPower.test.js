@@ -40,16 +40,14 @@ function nasaResponse(parameters, temporal = "daily") {
 function mockFetch(daily, monthly, dailyStatus = 200, monthlyStatus = 200) {
   const requests = [];
   globalThis.fetch = async (input) => {
-    const url = new URL(input);
+    const url = new URL(
+      typeof input === "string" ? input : input instanceof URL ? input.href : input.url,
+    );
     requests.push(url);
     const isDaily = url.pathname.includes("/daily/");
     const payload = isDaily ? daily : monthly;
     const status = isDaily ? dailyStatus : monthlyStatus;
-    return {
-      ok: status >= 200 && status < 300,
-      status,
-      text: async () => JSON.stringify(payload),
-    };
+    return new Response(JSON.stringify(payload), { status });
   };
   return requests;
 }

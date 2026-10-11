@@ -65,8 +65,8 @@ async function getAvailableTrueColorDate(year, signal) {
 }
 
 export default function NasaSatelliteLayer({
-  year,
-  comparisonYear,
+  year = null,
+  comparisonYear = null,
   cloudFree = false,
   opacity = 0.65,
   onStatusChange = ignoreStatusChange,
