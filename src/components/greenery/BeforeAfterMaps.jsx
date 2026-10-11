@@ -9,7 +9,6 @@ import {
 import "leaflet/dist/leaflet.css";
 import CountryBoundaries from "@/components/map/CountryBoundaries";
 import NasaSatelliteLayer from "@/components/map/NasaSatelliteLayer";
-import { getNasaNdviAvailableYears } from "@/services/nasaGibs";
 import {
   getGreeneryColor,
   getGreeneryForYear,
@@ -46,7 +45,7 @@ function FlyController({ region }) {
   return null;
 }
 
-function MapContent({ region, year, layer, history, onNasaStatusChange }) {
+function MapContent({ region, year, comparisonYear, layer, history, onNasaStatusChange }) {
   const isSatellite = layer === "truecolor";
   const isNasa = layer === "nasa";
   const greenery = getGreeneryForYear(history, year);
@@ -57,8 +56,9 @@ function MapContent({ region, year, layer, history, onNasaStatusChange }) {
         <>
           <TileLayer url={baseTiles.dark} attribution="&copy; Esri" />
           <NasaSatelliteLayer
-            key={`ndvi-${year}`}
+            key={`ndvi-${year}-${comparisonYear}`}
             year={year}
+            comparisonYear={comparisonYear}
             cloudFree
             onStatusChange={onNasaStatusChange}
           />
@@ -125,9 +125,9 @@ export default function BeforeAfterMaps({ region, startYear, endYear, layer, his
     <div>
       {layer === "nasa" && (
         <p className="mb-3 rounded-xl border border-secondary/20 bg-card/60 px-4 py-3 text-xs text-muted-foreground">
-          NASA MODIS 16-day cloud-screened NDVI composites are matched to each selected year. Each
-          panel reports the date of its composite; this vegetation-index layer uses a false-color
-          scale rather than natural-color satellite imagery.
+          Both panels use NASA MODIS 16-day cloud-screened NDVI composites from the latest shared
+          calendar date available for the selected years. Dates are shown below each map; this
+          vegetation-index layer uses a false-color scale rather than natural-color satellite imagery.
         </p>
       )}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -148,6 +148,7 @@ export default function BeforeAfterMaps({ region, startYear, endYear, layer, his
                 key={`before-${beforeYear}-${layer}`}
                 region={region}
                 year={beforeYear}
+                comparisonYear={afterYear}
                 layer={layer}
                 history={history}
                 onNasaStatusChange={setBeforeStatus}
@@ -175,6 +176,7 @@ export default function BeforeAfterMaps({ region, startYear, endYear, layer, his
                 key={`after-${afterYear}-${layer}`}
                 region={region}
                 year={afterYear}
+                comparisonYear={beforeYear}
                 layer={layer}
                 history={history}
                 onNasaStatusChange={setAfterStatus}

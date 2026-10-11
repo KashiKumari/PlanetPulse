@@ -30,7 +30,13 @@ export default function RegionDashboard() {
   const lng = parseFloat(searchParams.get("lng"));
   const id = searchParams.get("id");
 
-  const [data, setData] = useState({ info: null, history: null, forecast: null, nasa: null });
+  const [data, setData] = useState({
+    info: null,
+    history: null,
+    forecast: null,
+    nasa: null,
+    nasaError: null,
+  });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
@@ -246,7 +252,7 @@ export default function RegionDashboard() {
   );
 }
 
-function Metric({ label, value, unit, negative }) {
+function Metric({ label, value, unit = "", negative = false }) {
   return (
     <div className="flex items-center justify-between">
       <span className="text-sm text-muted-foreground">{label}</span>

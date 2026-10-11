@@ -1,6 +1,15 @@
 import { TrendingDown, TrendingUp } from "lucide-react";
 
-export default function IndicatorCard({ icon: Icon, label, value, unit, trend, trendLabel, color, source }) {
+export default function IndicatorCard({
+  icon: Icon,
+  label,
+  value,
+  unit,
+  trend = null,
+  trendLabel = "",
+  color,
+  source,
+}) {
   return (
     <div className="rounded-xl border border-border/60 bg-card/60 backdrop-blur-sm p-4 hover:border-border transition-colors">
       <div className="flex items-center justify-between mb-2.5">

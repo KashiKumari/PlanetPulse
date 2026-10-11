@@ -23,10 +23,10 @@ export function ecoAgentHref({ region, regions, startYear, endYear }) {
 }
 
 export default function EcoAgentLink({
-  region,
-  regions,
-  startYear,
-  endYear,
+  region = null,
+  regions = null,
+  startYear = null,
+  endYear = null,
   children = "Ask Eco Agent",
   className = "",
 }) {

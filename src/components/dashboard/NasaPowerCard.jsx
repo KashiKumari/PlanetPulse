@@ -8,7 +8,7 @@ function formatValue(value, unit, digits = 1) {
 
 export default function NasaPowerCard({
   data,
-  year,
+  year = null,
   loading = false,
   error = null,
   compact = false,

@@ -7,7 +7,7 @@ const COUNTRIES_URL =
 const DEFAULT_COUNTRY_NAMES = [];
 
 export default function CountryBoundaries({
-  selectedCountry,
+  selectedCountry = null,
   selectedCountries = DEFAULT_COUNTRY_NAMES,
   onSelectCountry,
 }) {

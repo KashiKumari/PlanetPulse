@@ -112,7 +112,7 @@ export default function GreeneryTrendChart({ history, startYear, endYear }) {
   );
 }
 
-function StatCard({ label, value, negative }) {
+function StatCard({ label, value, negative = false }) {
   return (
     <div className="text-center">
       <p className="text-xs text-muted-foreground">{label}</p>

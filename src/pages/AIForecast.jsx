@@ -208,7 +208,15 @@ export default function AIForecast() {
   );
 }
 
-function PredictionCard({ icon: Icon, label, value, range, color, trend, trendUnit }) {
+function PredictionCard({
+  icon: Icon,
+  label,
+  value,
+  range = null,
+  color,
+  trend = null,
+  trendUnit = "",
+}) {
   return (
     <div className="rounded-xl border border-border/60 bg-card/60 backdrop-blur-sm p-5">
       <div className="flex items-center gap-2 mb-2">
@@ -227,7 +235,7 @@ function PredictionCard({ icon: Icon, label, value, range, color, trend, trendUn
   );
 }
 
-function MetricRow({ label, value, unit, negative }) {
+function MetricRow({ label, value, unit = "", negative = false }) {
   return (
     <div className="flex items-center justify-between">
       <span className="text-sm text-muted-foreground">{label}</span>

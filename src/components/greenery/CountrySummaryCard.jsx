@@ -65,7 +65,14 @@ export default function CountrySummaryCard({
   );
 }
 
-function Metric({ label, value, color, negative, icon: Icon, iconColor }) {
+function Metric({
+  label,
+  value,
+  color = null,
+  negative = false,
+  icon: Icon = null,
+  iconColor = "",
+}) {
   return (
     <div>
       <p className="text-xs text-muted-foreground mb-1">{label}</p>

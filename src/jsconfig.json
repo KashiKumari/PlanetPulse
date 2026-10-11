@@ -1,9 +1,8 @@
 {
   "compilerOptions": {
-    "ignoreDeprecations": "6.0",
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./*"]
     },
     "jsx": "react-jsx",
     "module": "esnext",
@@ -15,7 +14,7 @@
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
     "resolveJsonModule": true,
-    "types": []
+    "types": ["vite/client"]
   },
   "include": ["**/*.js", "**/*.jsx"],
   "exclude": ["node_modules", "dist", "vite-plugins", "components/ui"]

@@ -20,7 +20,7 @@ export default function Greenery() {
   const [history, setHistory] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [startYear, setStartYear] = useState(2006);
+  const [startYear, setStartYear] = useState(2005);
   const [endYear, setEndYear] = useState(2026);
   const [selectedYear, setSelectedYear] = useState(2026);
   const [layer, setLayer] = useState("nasa");

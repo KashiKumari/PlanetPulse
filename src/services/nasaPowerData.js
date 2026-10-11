@@ -159,6 +159,9 @@ function compactDate(date) {
   return date.replaceAll("-", "");
 }
 
+/**
+ * @param {{startDate?: string, endDate?: string, now?: Date, lookbackDays?: number}} [options]
+ */
 export function getNasaPowerDailyRange({
   startDate,
   endDate,

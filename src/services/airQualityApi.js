@@ -23,7 +23,7 @@ export async function getCurrentAirQuality({ lat, lng, signal }) {
     longitude: String(lng),
     current: AIR_QUALITY_PARAMETERS,
     timezone: "auto",
-  });
+  }).toString();
 
   const response = await fetch(url, {
     signal: signal || AbortSignal.timeout(20000),

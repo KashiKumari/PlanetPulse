@@ -179,7 +179,15 @@ function RegionSelectorCard({ label, color, value, onChange }) {
   );
 }
 
-function IndicatorRow({ icon: Icon, label, unit, a, b, precision = 1, lowerIsBetter }) {
+function IndicatorRow({
+  icon: Icon,
+  label,
+  unit,
+  a,
+  b,
+  precision = 1,
+  lowerIsBetter = false,
+}) {
   const aBetter = lowerIsBetter ? a < b : a > b;
   return (
     <div className="flex items-center gap-3 py-2 border-b border-border/40 last:border-0">

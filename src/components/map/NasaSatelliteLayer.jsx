@@ -1,12 +1,12 @@
 import { useEffect, useRef, useState } from "react";
 import { TileLayer } from "react-leaflet";
-import { getMapImageryYear, getNasaNdviDate } from "@/services/nasaGibs";
+import { getNasaNdviDate } from "@/services/nasaGibs";
 
 const NRT_LAYER = "MODIS_Terra_CorrectedReflectance_TrueColor_v6.1_NRT";
 const ARCHIVE_LAYER = "MODIS_Terra_CorrectedReflectance_TrueColor";
 const CLOUD_SCREENED_LAYER = "MODIS_Terra_L3_NDVI_16Day";
 const GIBS_ROOT = "https://gibs.earthdata.nasa.gov/wmts/epsg3857";
-const ignoreStatusChange = () => {};
+const ignoreStatusChange = (_status) => {};
 
 function getLatestDateInYear(ranges, year) {
   const yearStart = Date.parse(`${year}-01-01T00:00:00Z`);
@@ -66,6 +66,7 @@ async function getAvailableTrueColorDate(year, signal) {
 
 export default function NasaSatelliteLayer({
   year,
+  comparisonYear,
   cloudFree = false,
   opacity = 0.65,
   onStatusChange = ignoreStatusChange,
@@ -73,8 +74,7 @@ export default function NasaSatelliteLayer({
   const [imagery, setImagery] = useState(null);
   const onStatusChangeRef = useRef(onStatusChange);
   useEffect(() => { onStatusChangeRef.current = onStatusChange; });
-  const imageryYear = getMapImageryYear(year);
-  const requestKey = `${imageryYear ?? "latest"}:${cloudFree}`;
+  const requestKey = `${year ?? "latest"}:${comparisonYear ?? "latest"}:${cloudFree}`;
 
   useEffect(() => {
     const controller = new AbortController();
@@ -82,8 +82,8 @@ export default function NasaSatelliteLayer({
 
     const timer = setTimeout(() => {
       (cloudFree
-        ? getNasaNdviDate(imageryYear, controller.signal)
-        : getAvailableTrueColorDate(imageryYear, controller.signal))
+        ? getNasaNdviDate(year, controller.signal, comparisonYear)
+        : getAvailableTrueColorDate(year, controller.signal))
         .then((availableDate) => {
           if (controller.signal.aborted) return;
           setImagery({ requestKey, date: availableDate });
@@ -100,7 +100,7 @@ export default function NasaSatelliteLayer({
       clearTimeout(timer);
       controller.abort();
     };
-  }, [imageryYear, cloudFree]); // onStatusChange intentionally excluded — stable via ref
+  }, [year, comparisonYear, cloudFree]); // onStatusChange intentionally excluded — stable via ref
 
   const displayDate = imagery?.requestKey === requestKey ? imagery.date : null;
   if (!displayDate) return null;
