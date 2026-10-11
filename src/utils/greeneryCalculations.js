@@ -1,4 +1,4 @@
-export const YEAR_RANGE = Array.from({ length: 22 }, (_, i) => 2005 + i);
+export const YEAR_RANGE = Array.from({ length: 21 }, (_, i) => 2006 + i);
 
 export function getGreeneryColor(pct) {
   if (pct >= 75) return "#16a34a";

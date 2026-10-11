@@ -42,7 +42,7 @@ function regionInfo({ lat, lng, name, id }) {
     indicators,
     risk: calculateRisk(indicators),
     history_summary: {
-      start_year: 2005,
+      start_year: 2006,
       end_year: 2026,
       data_points: history.length,
     },
@@ -265,7 +265,7 @@ function localAnalysis({ lat, lng, name, question }) {
     const first = history[0];
     const last = history.at(-1);
     answer =
-      `**Prototype historical trend for ${name || "this region"} (2005–2026)**\n\n` +
+      `**Prototype historical trend for ${name || "this region"} (2006–2026)**\n\n` +
       `Forest cover changes from **${first.forest_cover_pct}%** to **${last.forest_cover_pct}%**; NDVI changes from **${first.ndvi}** to **${last.ndvi}**. ` +
       `Temperature anomaly changes from **${first.temp_anomaly_c} °C** to **${last.temp_anomaly_c} °C**.\n\n` +
       `This series is generated prototype data, not measured historical observations.`;

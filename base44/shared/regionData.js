@@ -51,8 +51,8 @@ export function generateHistory(lat, lng) {
   const startNdvi = current.ndvi + Math.abs(current.ndvi_change_pct / 100);
   const years = [];
 
-  for (let year = 2005; year <= 2026; year++) {
-    const t = (year - 2005) / 21;
+  for (let year = 2006; year <= 2026; year++) {
+    const t = (year - 2006) / 20;
     const noise = () => (rand() - 0.5) * 2;
     years.push({
       year,
