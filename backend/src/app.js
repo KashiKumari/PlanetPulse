@@ -121,6 +121,9 @@ export function createEcoAgentApp({
   runAgent = answerEcoAgent,
 } = {}) {
   const app = express();
+
+  app.set("trust proxy", 1); // Fix Render proxy/rate-limit error
+  
   const allowed = new Set(allowedOrigins);
 
   app.disable("x-powered-by");
