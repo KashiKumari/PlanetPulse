@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { TileLayer } from "react-leaflet";
 import { getNasaNdviDate } from "@/services/nasaGibs";
 
@@ -70,11 +70,14 @@ export default function NasaSatelliteLayer({
   onStatusChange = ignoreStatusChange,
 }) {
   const [date, setDate] = useState(null);
+  // Keep a stable ref to onStatusChange so it never triggers the effect to re-run
+  const onStatusChangeRef = useRef(onStatusChange);
+  useEffect(() => { onStatusChangeRef.current = onStatusChange; });
 
   useEffect(() => {
     const controller = new AbortController();
     setDate(null);
-    onStatusChange({ loading: true, date: null, error: null });
+    onStatusChangeRef.current({ loading: true, date: null, error: null });
 
     const timer = setTimeout(() => {
       (cloudFree
@@ -82,12 +85,12 @@ export default function NasaSatelliteLayer({
         : getAvailableTrueColorDate(year, controller.signal))
         .then((availableDate) => {
           setDate(availableDate);
-          onStatusChange({ loading: false, date: availableDate, error: null });
+          onStatusChangeRef.current({ loading: false, date: availableDate, error: null });
         })
         .catch((error) => {
           if (error.name === "AbortError") return;
           console.error("Failed to load NASA GIBS imagery:", error);
-          onStatusChange({ loading: false, date: null, error: error.message });
+          onStatusChangeRef.current({ loading: false, date: null, error: error.message });
         });
     }, 180);
 
@@ -95,7 +98,7 @@ export default function NasaSatelliteLayer({
       clearTimeout(timer);
       controller.abort();
     };
-  }, [year, cloudFree, onStatusChange]);
+  }, [year, cloudFree]); // onStatusChange intentionally excluded — stable via ref
 
   if (!date) return null;
 
@@ -111,7 +114,7 @@ export default function NasaSatelliteLayer({
   return (
     <TileLayer
       key={`${layer}-${date}`}
-      url={`${GIBS_ROOT}/${latency}/${layer}/default/${date}/GoogleMapsCompatible_Level9/{z}/{y}/{x}.${format}`}
+      url={`${GIBS_ROOT}/${latency}/1.0.0/${layer}/default/${date}/GoogleMapsCompatible_Level9/{z}/{y}/{x}.${format}`}
       maxNativeZoom={9}
       opacity={opacity}
       attribution='Imagery &copy; <a href="https://earthdata.nasa.gov/">NASA EOSDIS GIBS</a>'
