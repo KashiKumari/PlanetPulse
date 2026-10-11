@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { TileLayer } from "react-leaflet";
-import { getNasaNdviDate } from "@/services/nasaGibs";
+import { getMapImageryYear, getNasaNdviDate } from "@/services/nasaGibs";
 
 const NRT_LAYER = "MODIS_Terra_CorrectedReflectance_TrueColor_v6.1_NRT";
 const ARCHIVE_LAYER = "MODIS_Terra_CorrectedReflectance_TrueColor";
@@ -73,7 +73,8 @@ export default function NasaSatelliteLayer({
   const [imagery, setImagery] = useState(null);
   const onStatusChangeRef = useRef(onStatusChange);
   useEffect(() => { onStatusChangeRef.current = onStatusChange; });
-  const requestKey = `${year ?? "latest"}:${cloudFree}`;
+  const imageryYear = getMapImageryYear(year);
+  const requestKey = `${imageryYear ?? "latest"}:${cloudFree}`;
 
   useEffect(() => {
     const controller = new AbortController();
@@ -81,8 +82,8 @@ export default function NasaSatelliteLayer({
 
     const timer = setTimeout(() => {
       (cloudFree
-        ? getNasaNdviDate(year, controller.signal)
-        : getAvailableTrueColorDate(year, controller.signal))
+        ? getNasaNdviDate(imageryYear, controller.signal)
+        : getAvailableTrueColorDate(imageryYear, controller.signal))
         .then((availableDate) => {
           if (controller.signal.aborted) return;
           setImagery({ requestKey, date: availableDate });
@@ -99,7 +100,7 @@ export default function NasaSatelliteLayer({
       clearTimeout(timer);
       controller.abort();
     };
-  }, [year, cloudFree]); // onStatusChange intentionally excluded — stable via ref
+  }, [imageryYear, cloudFree]); // onStatusChange intentionally excluded — stable via ref
 
   const displayDate = imagery?.requestKey === requestKey ? imagery.date : null;
   if (!displayDate) return null;

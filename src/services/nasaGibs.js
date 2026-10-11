@@ -2,6 +2,10 @@ const GIBS_ROOT = "https://gibs.earthdata.nasa.gov/wmts/epsg3857";
 const NDVI_LAYER = "MODIS_Terra_L3_NDVI_16Day";
 const TIME_DOMAIN_URL = `${GIBS_ROOT}/best/1.0.0/${NDVI_LAYER}/default/GoogleMapsCompatible_Level9/all/all.xml`;
 
+export function getMapImageryYear(year) {
+  return year === 2005 ? 2026 : year;
+}
+
 async function getTimeRanges(signal) {
   const response = await fetch(TIME_DOMAIN_URL, { signal });
   if (!response.ok) throw new Error(`NASA GIBS returned HTTP ${response.status}.`);

@@ -9,6 +9,7 @@ import {
 import "leaflet/dist/leaflet.css";
 import CountryBoundaries from "@/components/map/CountryBoundaries";
 import NasaSatelliteLayer from "@/components/map/NasaSatelliteLayer";
+import { getMapImageryYear } from "@/services/nasaGibs";
 import {
   getGreeneryColor,
   getGreeneryForYear,
@@ -207,6 +208,7 @@ export default function BeforeAfterMaps({ region, startYear, endYear, layer, his
 }
 
 function ImageryStatus({ year, status }) {
+  const imageryYear = getMapImageryYear(year);
   return (
     <p
       className={`mt-2 text-xs ${
@@ -216,7 +218,11 @@ function ImageryStatus({ year, status }) {
     >
       {status.loading && `Loading NASA MODIS NDVI composite for ${year}…`}
       {!status.loading && status.date &&
-        `NASA MODIS 16-day NDVI composite date: ${status.date} · selected year ${year}`}
+        `NASA MODIS 16-day NDVI composite date: ${status.date} · ${
+          imageryYear === year
+            ? `selected year ${year}`
+            : `${imageryYear} imagery shown for selected year ${year}`
+        }`}
       {!status.loading && status.error && `NASA imagery unavailable for ${year}: ${status.error}`}
     </p>
   );

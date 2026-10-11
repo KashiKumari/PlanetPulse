@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { getLatestNasaNdviDate } from "../services/nasaGibs.js";
+import { getLatestNasaNdviDate, getMapImageryYear } from "../services/nasaGibs.js";
 
 // Minimal range covering 2006 and 2026 at 16-day intervals
 // MODIS Terra NDVI 16-day starts 2000-02-18
@@ -37,6 +37,12 @@ test("2005 and 2006 resolve to imagery dates in their respective years", () => {
   assert.match(date2005, /^2005-/, `expected 2005 date, got ${date2005}`);
   assert.match(date2006, /^2006-/, `expected 2006 date, got ${date2006}`);
   assert.notEqual(date2005, date2006);
+});
+
+test("the 2005 map selection uses 2026 imagery without changing other years", () => {
+  assert.equal(getMapImageryYear(2005), 2026);
+  assert.equal(getMapImageryYear(2006), 2006);
+  assert.equal(getMapImageryYear(2026), 2026);
 });
 
 test("getLatestNasaNdviDate returns null for a year before MODIS data", () => {

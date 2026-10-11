@@ -11,6 +11,7 @@ import MapSearch from "@/components/map/MapSearch";
 import CountryBoundaries from "@/components/map/CountryBoundaries";
 import NasaSatelliteLayer from "@/components/map/NasaSatelliteLayer";
 import { allRegions } from "@/data/allRegions";
+import { getMapImageryYear } from "@/services/nasaGibs";
 import {
   getGreeneryColor,
   getChangeColor,
@@ -195,6 +196,7 @@ export default function GreeneryMap({
 }) {
   const isSatellite = layer === "truecolor";
   const isNasa = layer === "nasa";
+  const imageryYear = getMapImageryYear(year);
   const [nasaStatus, setNasaStatus] = useState({ loading: false, date: null, error: null });
   const selectedCountries = useMemo(() => getRegionCountries(region), [region]);
   const selectedMetric = isNasa
@@ -293,7 +295,11 @@ export default function GreeneryMap({
           {nasaStatus.loading &&
             `Loading NASA composite for ${year}…`}
           {nasaStatus.date &&
-            `NASA MODIS 16-day NDVI composite date: ${nasaStatus.date} · selected year ${year}`}
+            `NASA MODIS 16-day NDVI composite date: ${nasaStatus.date} · ${
+              imageryYear === year
+                ? `selected year ${year}`
+                : `${imageryYear} imagery shown for selected year ${year}`
+            }`}
           {nasaStatus.error && `NASA greenery composite unavailable: ${nasaStatus.error}`}
         </div>
       )}

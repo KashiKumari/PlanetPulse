@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
 import { Check, Loader2 } from "lucide-react";
-import { getNasaNdviAvailableYears } from "@/services/nasaGibs";
+import { getMapImageryYear, getNasaNdviAvailableYears } from "@/services/nasaGibs";
 import { YEAR_RANGE } from "@/utils/greeneryCalculations";
 
 export default function YearTimeline({ selectedYear, onChange }) {
   const [availableYears, setAvailableYears] = useState(null);
   const [availabilityError, setAvailabilityError] = useState(null);
+  const imageryYear = getMapImageryYear(selectedYear);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -52,8 +53,10 @@ export default function YearTimeline({ selectedYear, onChange }) {
         <span>{YEAR_RANGE[YEAR_RANGE.length - 1]}</span>
       </div>
       <p className="mb-3 text-xs text-muted-foreground" aria-live="polite">
-        {availableYears?.includes(selectedYear)
-          ? `NASA cloud-screened vegetation imagery is available for ${selectedYear}.`
+        {availableYears?.includes(imageryYear)
+          ? imageryYear !== selectedYear
+            ? `NASA cloud-screened vegetation imagery from ${imageryYear} is shown for the ${selectedYear} selection.`
+            : `NASA cloud-screened vegetation imagery is available for ${selectedYear}.`
           : availabilityError
             ? "NASA imagery dates could not be checked. You can still select a year."
             : "Checking NASA imagery availability…"}
@@ -66,7 +69,8 @@ export default function YearTimeline({ selectedYear, onChange }) {
       <div className="flex items-center justify-between gap-2 overflow-x-auto pb-1">
         {YEAR_RANGE.map((year) => {
           const isSelected = year === selectedYear;
-          const hasImage = availableYears?.includes(year);
+          const mapYear = getMapImageryYear(year);
+          const hasImage = availableYears?.includes(mapYear);
           return (
             <button
               key={year}
@@ -91,7 +95,9 @@ export default function YearTimeline({ selectedYear, onChange }) {
               ) : hasImage ? (
                 <>
                   <Check className="h-3 w-3 text-primary" aria-hidden="true" />
-                  <span className="text-[10px] text-primary">NASA image</span>
+                  <span className="text-[10px] text-primary">
+                    {mapYear === year ? "NASA image" : `${mapYear} image`}
+                  </span>
                 </>
               ) : (
                 <span className="text-[10px] text-muted-foreground">No image</span>
