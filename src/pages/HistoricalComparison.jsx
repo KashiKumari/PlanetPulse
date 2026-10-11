@@ -30,6 +30,7 @@ import NasaPowerChart from "@/components/dashboard/NasaPowerChart";
 import NasaPowerCard from "@/components/dashboard/NasaPowerCard";
 import CurrentAirQualityCard from "@/components/dashboard/CurrentAirQualityCard";
 import EcoAgentLink from "@/components/agent/EcoAgentLink";
+import { getHistorySnapshot, requestHistory } from "@/utils/historyData";
 
 const tooltipStyle = {
   background: "hsl(222 42% 8%)",
@@ -41,10 +42,10 @@ const tooltipStyle = {
 export default function HistoricalComparison() {
   const [regionId, setRegionId] = useState("in-maharashtra");
   const [history, setHistory] = useState(null);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [selectedYear, setSelectedYear] = useState(2026);
-  const [nasaState, setNasaState] = useState({ data: null, loading: false, error: null });
+  const [nasaState, setNasaState] = useState({ data: null, loading: true, error: null });
 
   const region = allRegions.find((r) => r.id === regionId);
 
@@ -52,14 +53,22 @@ export default function HistoricalComparison() {
     if (!region) return;
     const controller = new AbortController();
     setLoading(true);
+    setHistory(null);
     setError(null);
     setNasaState({ data: null, loading: true, error: null });
-    api
-      .regionHistory({ lat: region.lat, lng: region.lng, name: region.name })
-      .then((res) => {
-        if (!controller.signal.aborted) setHistory(res.data.history);
+    requestHistory(api.regionHistory, {
+      lat: region.lat,
+      lng: region.lng,
+      name: region.name,
+    })
+      .then((historyData) => {
+        if (!controller.signal.aborted) setHistory(historyData);
       })
-      .catch((e) => setError(e.message || "Failed to load history"))
+      .catch((requestError) => {
+        if (!controller.signal.aborted) {
+          setError(requestError.message || "Failed to load historical data.");
+        }
+      })
       .finally(() => {
         if (!controller.signal.aborted) setLoading(false);
       });
@@ -82,16 +91,7 @@ export default function HistoricalComparison() {
     return () => controller.abort();
   }, [regionId, region]);
 
-  const current = history?.find((h) => h.year === selectedYear);
-  const baseline = history?.find((h) => h.year === 2005);
-
-  const deltas = current && baseline
-    ? {
-        forest_cover_pct: current.forest_cover_pct - baseline.forest_cover_pct,
-        ndvi: current.ndvi - baseline.ndvi,
-        temp_anomaly_c: current.temp_anomaly_c - baseline.temp_anomaly_c,
-      }
-    : null;
+  const { current, deltas } = getHistorySnapshot(history || [], selectedYear);
 
   return (
     <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
@@ -142,16 +142,31 @@ export default function HistoricalComparison() {
       </div>
 
       {loading && (
-        <div className="flex items-center justify-center py-20">
+        <div role="status" className="flex items-center justify-center gap-3 py-20 text-sm text-muted-foreground">
           <Loader2 className="h-7 w-7 animate-spin text-primary" />
+          Loading historical data…
         </div>
       )}
 
       {error && (
-        <div className="text-center py-20 text-destructive text-sm">{error}</div>
+        <div role="alert" className="rounded-xl border border-destructive/30 bg-destructive/5 px-4 py-6 text-center text-sm text-destructive">
+          Historical data could not be loaded: {error}
+        </div>
       )}
 
-      {history && !loading && (
+      {history && !loading && history.length === 0 && (
+        <div role="status" className="rounded-xl border border-border/60 bg-card/60 px-4 py-6 text-center text-sm text-muted-foreground">
+          No historical records are available for this region.
+        </div>
+      )}
+
+      {history && !loading && history.length > 0 && !current && (
+        <div role="status" className="mb-5 rounded-xl border border-border/60 bg-card/60 px-4 py-4 text-sm text-muted-foreground">
+          No historical record is available for {selectedYear}. Other available years are shown below.
+        </div>
+      )}
+
+      {history && !loading && history.length > 0 && (
         <>
           {/* Time slider */}
           <div className="rounded-2xl border border-border/60 bg-card/60 backdrop-blur-sm p-5 mb-5">
@@ -166,7 +181,7 @@ export default function HistoricalComparison() {
                 label="Forest Cover"
                 value={current.forest_cover_pct}
                 unit="%"
-                delta={deltas.forest_cover_pct}
+                delta={deltas?.forest_cover_pct}
                 color={getMetricColor("forest", region.forest_loss_pct)}
               />
               <SnapshotCard
@@ -174,7 +189,7 @@ export default function HistoricalComparison() {
                 label="NDVI"
                 value={current.ndvi}
                 unit=""
-                delta={deltas.ndvi}
+                delta={deltas?.ndvi}
                 color={getMetricColor("ndvi", region.ndvi_change_pct)}
                 deltaPrecision={3}
               />
@@ -183,7 +198,7 @@ export default function HistoricalComparison() {
                 label="Temp Anomaly"
                 value={`+${current.temp_anomaly_c}`}
                 unit="°C"
-                delta={deltas.temp_anomaly_c}
+                delta={deltas?.temp_anomaly_c}
                 color={getMetricColor("temperature", region.temp_anomaly_c)}
               />
             </div>
