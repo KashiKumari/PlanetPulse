@@ -30,6 +30,15 @@ test("getLatestNasaNdviDate returns different dates for different years", () => 
   );
 });
 
+test("2005 and 2006 resolve to imagery dates in their respective years", () => {
+  const date2005 = getLatestNasaNdviDate(RANGES, 2005);
+  const date2006 = getLatestNasaNdviDate(RANGES, 2006);
+
+  assert.match(date2005, /^2005-/, `expected 2005 date, got ${date2005}`);
+  assert.match(date2006, /^2006-/, `expected 2006 date, got ${date2006}`);
+  assert.notEqual(date2005, date2006);
+});
+
 test("getLatestNasaNdviDate returns null for a year before MODIS data", () => {
   const date = getLatestNasaNdviDate(RANGES, 1999);
   assert.equal(date, null, "should return null for year before data starts");

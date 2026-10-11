@@ -70,16 +70,13 @@ export default function NasaSatelliteLayer({
   opacity = 0.65,
   onStatusChange = ignoreStatusChange,
 }) {
-  const [date, setDate] = useState(null);
-  // prevDate keeps the last successfully loaded date visible while the next one loads
-  // This prevents a blank map flash and stops stale tiles from a different year showing
-  const prevDateRef = useRef(null);
+  const [imagery, setImagery] = useState(null);
   const onStatusChangeRef = useRef(onStatusChange);
   useEffect(() => { onStatusChangeRef.current = onStatusChange; });
+  const requestKey = `${year ?? "latest"}:${cloudFree}`;
 
   useEffect(() => {
     const controller = new AbortController();
-    // Do NOT clear date here — keep previous tiles visible until new date resolves
     onStatusChangeRef.current({ loading: true, date: null, error: null });
 
     const timer = setTimeout(() => {
@@ -87,15 +84,13 @@ export default function NasaSatelliteLayer({
         ? getNasaNdviDate(year, controller.signal)
         : getAvailableTrueColorDate(year, controller.signal))
         .then((availableDate) => {
-          prevDateRef.current = availableDate;
-          setDate(availableDate);
+          if (controller.signal.aborted) return;
+          setImagery({ requestKey, date: availableDate });
           onStatusChangeRef.current({ loading: false, date: availableDate, error: null });
         })
         .catch((error) => {
-          if (error.name === "AbortError") return;
+          if (controller.signal.aborted || error.name === "AbortError") return;
           console.error("Failed to load NASA GIBS imagery:", error);
-          prevDateRef.current = null;
-          setDate(null);
           onStatusChangeRef.current({ loading: false, date: null, error: error.message });
         });
     }, 180);
@@ -106,8 +101,7 @@ export default function NasaSatelliteLayer({
     };
   }, [year, cloudFree]); // onStatusChange intentionally excluded — stable via ref
 
-  // Use the resolved date for this year; fall back to prevDate only if same year/cloudFree combo
-  const displayDate = date;
+  const displayDate = imagery?.requestKey === requestKey ? imagery.date : null;
   if (!displayDate) return null;
 
   const nearRealTime = year == null && !cloudFree;
