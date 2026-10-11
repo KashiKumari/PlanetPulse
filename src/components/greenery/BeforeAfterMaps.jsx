@@ -14,6 +14,7 @@ import {
   getGreeneryColor,
   getGreeneryForYear,
   computeGreeneryStats,
+  getChronologicalYears,
 } from "@/utils/greeneryCalculations";
 
 const baseTiles = {
@@ -88,6 +89,7 @@ function MapContent({ region, year, layer, history, onNasaStatusChange }) {
 }
 
 export default function BeforeAfterMaps({ region, startYear, endYear, layer, history }) {
+  const [beforeYear, afterYear] = getChronologicalYears(startYear, endYear);
   const [mapA, setMapA] = useState(null);
   const [mapB, setMapB] = useState(null);
   const [beforeStatus, setBeforeStatus] = useState({ loading: false, date: null, error: null });
@@ -116,7 +118,7 @@ export default function BeforeAfterMaps({ region, startYear, endYear, layer, his
     };
   }, [mapA, mapB]);
 
-  const stats = history ? computeGreeneryStats(history, startYear, endYear) : null;
+  const stats = history ? computeGreeneryStats(history, beforeYear, afterYear) : null;
   const center = region ? [region.lat, region.lng] : [20, 0];
 
   return (
@@ -131,7 +133,7 @@ export default function BeforeAfterMaps({ region, startYear, endYear, layer, his
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
         <div>
           <div className="rounded-t-xl bg-card/80 backdrop-blur-xl px-4 py-2 border border-border/60 border-b-0">
-            <h3 className="font-display font-bold text-sm">Before · {startYear}</h3>
+            <h3 className="font-display font-bold text-sm">Before · {beforeYear}</h3>
           </div>
           <div className="h-[350px] w-full rounded-b-xl overflow-hidden border border-border/60 border-t-0">
             <MapContainer
@@ -143,9 +145,9 @@ export default function BeforeAfterMaps({ region, startYear, endYear, layer, his
               <MapInit registerMap={setMapA} />
               <FlyController region={region} />
               <MapContent
-                key={`before-${startYear}-${layer}`}
+                key={`before-${beforeYear}-${layer}`}
                 region={region}
-                year={startYear}
+                year={beforeYear}
                 layer={layer}
                 history={history}
                 onNasaStatusChange={setBeforeStatus}
@@ -153,12 +155,12 @@ export default function BeforeAfterMaps({ region, startYear, endYear, layer, his
             </MapContainer>
           </div>
           {layer === "nasa" && (
-            <ImageryStatus year={startYear} status={beforeStatus} />
+            <ImageryStatus year={beforeYear} status={beforeStatus} />
           )}
         </div>
         <div>
           <div className="rounded-t-xl bg-card/80 backdrop-blur-xl px-4 py-2 border border-border/60 border-b-0">
-            <h3 className="font-display font-bold text-sm">After · {endYear}</h3>
+            <h3 className="font-display font-bold text-sm">After · {afterYear}</h3>
           </div>
           <div className="h-[350px] w-full rounded-b-xl overflow-hidden border border-border/60 border-t-0">
             <MapContainer
@@ -170,9 +172,9 @@ export default function BeforeAfterMaps({ region, startYear, endYear, layer, his
               <MapInit registerMap={setMapB} />
               <FlyController region={region} />
               <MapContent
-                key={`after-${endYear}-${layer}`}
+                key={`after-${afterYear}-${layer}`}
                 region={region}
-                year={endYear}
+                year={afterYear}
                 layer={layer}
                 history={history}
                 onNasaStatusChange={setAfterStatus}
@@ -180,7 +182,7 @@ export default function BeforeAfterMaps({ region, startYear, endYear, layer, his
             </MapContainer>
           </div>
           {layer === "nasa" && (
-            <ImageryStatus year={endYear} status={afterStatus} />
+            <ImageryStatus year={afterYear} status={afterStatus} />
           )}
         </div>
       </div>
@@ -188,7 +190,7 @@ export default function BeforeAfterMaps({ region, startYear, endYear, layer, his
       {stats && (
         <div className="mt-3 rounded-xl border border-border/60 bg-card/60 backdrop-blur-sm p-4 text-center">
           <p className="text-sm text-muted-foreground">
-            Forest/greenery change ({startYear} → {endYear})
+            Forest/greenery change ({beforeYear} → {afterYear})
           </p>
           <p
             className={`font-display text-3xl font-bold ${

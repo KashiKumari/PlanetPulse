@@ -31,6 +31,10 @@ export function getNdviForYear(history, year) {
   return history?.find((h) => h.year === year)?.ndvi;
 }
 
+export function getChronologicalYears(yearA, yearB) {
+  return yearA <= yearB ? [yearA, yearB] : [yearB, yearA];
+}
+
 export function computeGreeneryStats(history, startYear, endYear) {
   if (!history || history.length === 0) return null;
   const first = history.find((h) => h.year === startYear) || history[0];
