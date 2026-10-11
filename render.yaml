@@ -1,5 +1,17 @@
 services:
   - type: web
+    name: planet-pulse-frontend
+    runtime: static
+    rootDir: src
+    buildCommand: npm install && npm run build
+    staticPublishPath: dist
+    pullRequestPreviewsEnabled: false
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
+
+  - type: web
     name: planet-pulse-eco-agent
     runtime: node
     rootDir: backend

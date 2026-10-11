@@ -33,7 +33,8 @@ async function getAvailableTrueColorDate(year, signal) {
   const nearRealTime = year == null;
   const latency = nearRealTime ? "nrt" : "best";
   const layer = nearRealTime ? NRT_LAYER : ARCHIVE_LAYER;
-  const domainsUrl = `${GIBS_ROOT}/${latency}/1.0.0/${layer}/default/GoogleMapsCompatible_Level9/all/all.xml`; // /1.0.0/ is correct for the Domains endpoint only
+  // /1.0.0/ is correct for the Domains XML endpoint only — NOT for tile requests
+  const domainsUrl = `${GIBS_ROOT}/${latency}/1.0.0/${layer}/default/GoogleMapsCompatible_Level9/all/all.xml`;
   const response = await fetch(domainsUrl, { signal });
   if (!response.ok) throw new Error(`NASA GIBS returned HTTP ${response.status}.`);
 
@@ -70,13 +71,15 @@ export default function NasaSatelliteLayer({
   onStatusChange = ignoreStatusChange,
 }) {
   const [date, setDate] = useState(null);
-  // Keep a stable ref to onStatusChange so it never triggers the effect to re-run
+  // prevDate keeps the last successfully loaded date visible while the next one loads
+  // This prevents a blank map flash and stops stale tiles from a different year showing
+  const prevDateRef = useRef(null);
   const onStatusChangeRef = useRef(onStatusChange);
   useEffect(() => { onStatusChangeRef.current = onStatusChange; });
 
   useEffect(() => {
     const controller = new AbortController();
-    setDate(null);
+    // Do NOT clear date here — keep previous tiles visible until new date resolves
     onStatusChangeRef.current({ loading: true, date: null, error: null });
 
     const timer = setTimeout(() => {
@@ -84,12 +87,15 @@ export default function NasaSatelliteLayer({
         ? getNasaNdviDate(year, controller.signal)
         : getAvailableTrueColorDate(year, controller.signal))
         .then((availableDate) => {
+          prevDateRef.current = availableDate;
           setDate(availableDate);
           onStatusChangeRef.current({ loading: false, date: availableDate, error: null });
         })
         .catch((error) => {
           if (error.name === "AbortError") return;
           console.error("Failed to load NASA GIBS imagery:", error);
+          prevDateRef.current = null;
+          setDate(null);
           onStatusChangeRef.current({ loading: false, date: null, error: error.message });
         });
     }, 180);
@@ -100,7 +106,9 @@ export default function NasaSatelliteLayer({
     };
   }, [year, cloudFree]); // onStatusChange intentionally excluded — stable via ref
 
-  if (!date) return null;
+  // Use the resolved date for this year; fall back to prevDate only if same year/cloudFree combo
+  const displayDate = date;
+  if (!displayDate) return null;
 
   const nearRealTime = year == null && !cloudFree;
   const latency = nearRealTime ? "nrt" : "best";
@@ -111,10 +119,11 @@ export default function NasaSatelliteLayer({
       : ARCHIVE_LAYER;
   const format = cloudFree ? "png" : "jpg";
 
+  // Tile URL: NO /1.0.0/ — confirmed HTTP 200 without it, 400 with it
   return (
     <TileLayer
-      key={`${layer}-${date}`}
-      url={`${GIBS_ROOT}/${latency}/${layer}/default/${date}/GoogleMapsCompatible_Level9/{z}/{y}/{x}.${format}`}
+      key={`${layer}-${displayDate}`}
+      url={`${GIBS_ROOT}/${latency}/${layer}/default/${displayDate}/GoogleMapsCompatible_Level9/{z}/{y}/{x}.${format}`}
       maxNativeZoom={9}
       opacity={opacity}
       attribution='Imagery &copy; <a href="https://earthdata.nasa.gov/">NASA EOSDIS GIBS</a>'

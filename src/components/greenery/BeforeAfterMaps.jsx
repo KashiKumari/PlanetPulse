@@ -142,6 +142,7 @@ export default function BeforeAfterMaps({ region, startYear, endYear, layer, his
               <MapInit registerMap={setMapA} />
               <FlyController region={region} />
               <MapContent
+                key={`before-${startYear}-${layer}`}
                 region={region}
                 year={startYear}
                 layer={layer}
@@ -166,7 +167,9 @@ export default function BeforeAfterMaps({ region, startYear, endYear, layer, his
               style={{ background: "#0a0e1a" }}
             >
               <MapInit registerMap={setMapB} />
+              <FlyController region={region} />
               <MapContent
+                key={`after-${endYear}-${layer}`}
                 region={region}
                 year={endYear}
                 layer={layer}
