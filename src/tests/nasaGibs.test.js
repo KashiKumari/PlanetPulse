@@ -65,35 +65,38 @@ test("changing endYear does not affect startYear date", () => {
   );
 });
 
-test("GIBS tile URL contains 1.0.0 path segment and correct date", () => {
+test("GIBS tile URL does NOT contain /1.0.0/ and contains correct date", () => {
   const GIBS_ROOT = "https://gibs.earthdata.nasa.gov/wmts/epsg3857";
   const CLOUD_SCREENED_LAYER = "MODIS_Terra_L3_NDVI_16Day";
   const date = "2006-12-19";
   const year = 2006;
 
-  // Reproduce the URL construction from NasaSatelliteLayer
+  // Reproduce the URL construction from NasaSatelliteLayer (no /1.0.0/ for tile requests)
   const latency = "best";
   const layer = CLOUD_SCREENED_LAYER;
   const format = "png";
-  const url = `${GIBS_ROOT}/${latency}/1.0.0/${layer}/default/${date}/GoogleMapsCompatible_Level9/{z}/{y}/{x}.${format}`;
+  const url = `${GIBS_ROOT}/${latency}/${layer}/default/${date}/GoogleMapsCompatible_Level9/{z}/{y}/{x}.${format}`;
 
-  assert.ok(url.includes("/1.0.0/"), "URL must include /1.0.0/ path segment");
+  assert.ok(!url.includes("/1.0.0/"), `Tile URL must NOT include /1.0.0/ — causes HTTP 400. Got: ${url}`);
   assert.ok(url.includes(date), `URL must include the date ${date}`);
   assert.ok(url.includes(String(year.toString().slice(0, 4))), "URL must include the year");
   assert.ok(!url.includes("2026"), `Before URL must not contain 2026, got: ${url}`);
 });
 
-test("Before and After GIBS tile URLs are distinct when years differ", () => {
+test("Before and After GIBS tile URLs are distinct and have no /1.0.0/", () => {
   const GIBS_ROOT = "https://gibs.earthdata.nasa.gov/wmts/epsg3857";
   const LAYER = "MODIS_Terra_L3_NDVI_16Day";
 
   const beforeDate = getLatestNasaNdviDate(RANGES, 2006);
   const afterDate = getLatestNasaNdviDate(RANGES, 2026);
 
-  const beforeUrl = `${GIBS_ROOT}/best/1.0.0/${LAYER}/default/${beforeDate}/GoogleMapsCompatible_Level9/{z}/{y}/{x}.png`;
-  const afterUrl = `${GIBS_ROOT}/best/1.0.0/${LAYER}/default/${afterDate}/GoogleMapsCompatible_Level9/{z}/{y}/{x}.png`;
+  // Correct tile URL format — no /1.0.0/ (confirmed HTTP 200 without it, 400 with it)
+  const beforeUrl = `${GIBS_ROOT}/best/${LAYER}/default/${beforeDate}/GoogleMapsCompatible_Level9/{z}/{y}/{x}.png`;
+  const afterUrl = `${GIBS_ROOT}/best/${LAYER}/default/${afterDate}/GoogleMapsCompatible_Level9/{z}/{y}/{x}.png`;
 
   assert.notEqual(beforeUrl, afterUrl, "Before and After tile URLs must be different");
   assert.ok(beforeUrl.includes("2006"), `Before URL must contain 2006, got: ${beforeUrl}`);
   assert.ok(afterUrl.includes("2026"), `After URL must contain 2026, got: ${afterUrl}`);
+  assert.ok(!beforeUrl.includes("/1.0.0/"), `Tile URL must NOT include /1.0.0/`);
+  assert.ok(!afterUrl.includes("/1.0.0/"), `Tile URL must NOT include /1.0.0/`);
 });
