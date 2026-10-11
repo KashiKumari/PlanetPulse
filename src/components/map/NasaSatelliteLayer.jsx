@@ -33,7 +33,7 @@ async function getAvailableTrueColorDate(year, signal) {
   const nearRealTime = year == null;
   const latency = nearRealTime ? "nrt" : "best";
   const layer = nearRealTime ? NRT_LAYER : ARCHIVE_LAYER;
-  const domainsUrl = `${GIBS_ROOT}/${latency}/1.0.0/${layer}/default/GoogleMapsCompatible_Level9/all/all.xml`;
+  const domainsUrl = `${GIBS_ROOT}/${latency}/1.0.0/${layer}/default/GoogleMapsCompatible_Level9/all/all.xml`; // /1.0.0/ is correct for the Domains endpoint only
   const response = await fetch(domainsUrl, { signal });
   if (!response.ok) throw new Error(`NASA GIBS returned HTTP ${response.status}.`);
 
@@ -114,7 +114,7 @@ export default function NasaSatelliteLayer({
   return (
     <TileLayer
       key={`${layer}-${date}`}
-      url={`${GIBS_ROOT}/${latency}/1.0.0/${layer}/default/${date}/GoogleMapsCompatible_Level9/{z}/{y}/{x}.${format}`}
+      url={`${GIBS_ROOT}/${latency}/${layer}/default/${date}/GoogleMapsCompatible_Level9/{z}/{y}/{x}.${format}`}
       maxNativeZoom={9}
       opacity={opacity}
       attribution='Imagery &copy; <a href="https://earthdata.nasa.gov/">NASA EOSDIS GIBS</a>'
